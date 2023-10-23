@@ -1,0 +1,42 @@
+<?php
+	$categories = array();
+	$host = $_SERVER['SERVER_NAME'];
+?>
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>BBS MENU for 14ch</TITLE>
+<BASE TARGET="cont">
+</HEAD>
+<BODY TEXT="#CC3300" BGCOLOR="#FFFFFF" link="#0000FF" alink="#ff0000" vlink="#660099">
+<font size="2">
+<A HREF=http://<?=$host?>/iyan.html>14ちゃんねるへようこそ</A>
+<?php
+	$dir = '';
+	$list1 = glob($dir . '*', GLOB_ONLYDIR);
+
+	foreach ($list1 as $dir1) {
+		if (file_exists($dir1.'/SETTING.TXT')) {
+			$settings = parse_ini_file($dir1.'/SETTING.TXT',false,INI_SCANNER_RAW);
+			$categories[$settings["BBS_CATEGORY"]][$dir1] = "<A HREF=http://$host/$dir1/>".$settings["BBS_TITLE"]."</A>";
+		}
+	}
+
+	foreach ($categories as $index => $value) {
+		echo "<BR><BR><B>".$index."</B><BR>";
+		$max = count($categories["$index"]);
+		foreach ($value as $board) {
+			echo $board."<BR>\n";
+			$count++;
+		}
+	}
+?>
+<BR>
+<BR><B>運営案内</B><BR>
+
+<BR>◆苦情は<BR><A HREF="/accuse/">批判要望</A>へ
+<BR><A HREF="mailto:nennneko5787@gmail.com">メール</A>
+<br><br><br>
+</font>
+</BODY>
+</HTML>

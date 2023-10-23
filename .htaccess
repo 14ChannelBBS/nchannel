@@ -1,0 +1,24 @@
+ErrorDocument 404 /404.php
+
+AddType text/plain .dat
+php_value date.timezone Asia/Tokyo
+AddType application/x-httpd-php .cgi
+AddType image/x-icon .ico
+AddDefaultCharset Shift-JIS
+
+php_value session.gc_maxlifetime 43200
+php_value session.gc_probability 1
+php_value session.gc_divisor 100
+php_value display_errors false
+
+<Files ~ "^robotcheck_bypass.txt$">
+  deny from all
+</Files>
+
+<Files ~ "^bbsmenu.html$">
+  AddType application/x-httpd-php .html
+</Files>
+
+<Files ~ "^iyan.html$">
+  AddType application/x-httpd-php .html
+</Files>
