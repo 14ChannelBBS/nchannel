@@ -16,3 +16,7 @@
 ④最後に、/test/admin.phpにアクセスして、②で設定したキャップでログインして、何をするか考えてみる：の横にあるところでindex.htmlの再生成を選択肢、操作開始をクリック。  
   
 この手順で多分板ができます。あとは③と④を繰り返して板を増やしまくりましょう。
+## mirror
+リポジトリのミラーたち  
+- [Github (https://github.com/14ChannelBBS/nchannel)](https://github.com/14ChannelBBS/nchannel)  
+- [git.3chan.cc (https://git.3chan.cc/nennneko5787/14ch)](https://git.3chan.cc/nennneko5787/14ch)
