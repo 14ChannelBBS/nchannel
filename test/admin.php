@@ -18,12 +18,13 @@
 			if (password_verify($_POST["pass"],$caps[$index][0])){
 				$from = str_replace("<FROM>",$from,$caps[$index][1]);
 				$id = $caps[$index][2];
-				$iscap = $caps[$index][3];
-				$timeskip = $caps[$index][4];
+				$isadmin = $caps[$index][3];
+				$iscap = $caps[$index][4];
+				$timeskip = $caps[$index][5];
 			}
 		}
 
-		if ($iscap){
+		if ($isadmin){
 			if (!isset($_POST["operation"])){
 ?>
 <h1>キャップ持ち用管理ページ（笑）</h1>

@@ -5,6 +5,7 @@
 	require "SysSettings.php";
 	$iscap = false;
 	$timeskip = false;
+	$isadmin = false;
 	$bbs = $_POST["bbs"];
 	$key = $_POST["key"];
 	$time = $_POST["time"];
@@ -141,7 +142,7 @@
 		function ($matches) {
 			$string = str_replace("&", "&amp;",$matches[1]);
 			$string = htmlspecialchars_decode($string);
-			return mb_str_shuffle($string);
+			return mb_str_shuffle($string)." <br> <span style=\"color: red;\"><small>シャッフル、原文→「".$matches[1]."」</small></span>";
 		},
 		$content
 	);
@@ -329,7 +330,7 @@
 	}
 
 	foreach ($nanasi as $mailaddr){
-		$mailad = openssl_decrypt($mailaddr, 'AES-256-CBC', "Cirno_BAKA_KEY_SANNAN_NAITAYO_5787_````*****+++NIOFJH)FHSGA)HDFABFKJHABFAN", 0, "OREHA_NENNNNEKO%'('_DSJNADUAHUDASD(UTRJHIWO");
+		$mailad = openssl_decrypt($mailaddr, 'AES-256-CBC', $encrypt_key, 0, $encrypt_iv);
 		mb_internal_encoding("Shift_JIS");
 		mb_language("ja");
 		$header = array();
@@ -708,13 +709,15 @@ function checkacap(){
 	global $iscap;
 	global $timeskip;
 	global $caps;
+	global $isadmin;
 	preg_match('/#(.*)/', $mail, $match);
 	foreach($caps as $index => $value){
 		if (password_verify($match[1],$caps[$index][0])){
 			$from = str_replace("<FROM>",$from,$caps[$index][1]);
 			$id = $caps[$index][2];
-			$iscap = $caps[$index][3];
-			$timeskip = $caps[$index][4];
+			$isadmin = $caps[$index][3];
+			$iscap = $caps[$index][4];
+			$timeskip = $caps[$index][5];
 		}
 	}
 	$mail = preg_replace('/#(.*)/', '', $mail);
