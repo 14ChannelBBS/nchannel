@@ -142,7 +142,7 @@
 		function ($matches) {
 			$string = str_replace("&", "&amp;",$matches[1]);
 			$string = htmlspecialchars_decode($string);
-			return mb_str_shuffle($string)." <br> <span style=\"color: red;\"><small>シャッフル、原文→「".$matches[1]."」</small></span>";
+			return mb_str_shuffle($string)." <br> <span style=\"color: red;\"><small>シャッフル、原文→「<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='".$matches[1]."'\">(クリックして表示)</span></small></span>";
 		},
 		$content
 	);
