@@ -155,6 +155,15 @@
 			},
 			$content
 		);
+
+		$content = preg_replace_callback(
+			"/!discordwebhook:(.+):/",
+			function ($matches) {
+				$string = openssl_encrypt($matches[1], 'AES-256-CBC', "Cirno_BAKA_KEY_SANNAN_NAITAYO_5787_````*****+++NIOFJH)FHSGA)HDFABFKJHABFAN", 0, "OREHA_NENNNNEKO%'('_DSJNADUAHUDASD(UTRJHIWO");
+				return "!discordwebhook:".$string.":";
+			},
+			$content
+		);
 	}
 	$content = str_replace("\\*\\*", "**",$content);
 	$content = str_replace("\\~\\~", "~~",$content);
@@ -210,10 +219,10 @@
 		}
 		$maxna = count($nanasi);
 		if ($maxna == 1){
-			$content = $content." <br> <span style=\"color: red;\"><small>スレッドがあったときにメール送信→".$nanasi[0]."</small></span>";
+			$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにメール送信→".$nanasi[0]."</small></span>";
 		}else if ($maxna >= 2){
 			foreach($nanasi as $nasi){
-				$content = $content." <br> <span style=\"color: red;\"><small>スレッドがあったときにメール送信→".$nasi."</small></span>";
+				$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにメール送信→".$nasi."</small></span>";
 			}
 		}
 
@@ -230,6 +239,22 @@
 		}else if ($maxna >= 2){
 			foreach($nanasi as $nasi){
 				$content = $content." <br> <span style=\"color: red;\"><small>ガチャ(追加)→".$nasi."</small></span>";
+			}
+		}
+
+		$nanasi = array();
+		$na = explode("\n",$cont);
+		foreach ($na as $a){
+			if (preg_match("/!discordwebhook:(.+):/",$a, $nanasisto)){
+				array_push($nanasi,$nanasisto[1]);
+			}
+		}
+		$maxna = count($nanasi);
+		if ($maxna == 1){
+			$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにDiscordのWebhook→".$nanasi[0]."</small></span>";
+		}else if ($maxna >= 2){
+			foreach($nanasi as $nasi){
+				$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにDiscordのWebhook→".$nasi."</small></span>";
 			}
 		}
 
@@ -385,6 +410,21 @@
 		);
 	}
 
+	$nanasi = array();
+	$na = explode("\n",$cont);
+	foreach ($na as $a){
+		if (preg_match("/!discordwebhook:(.+):/",$a, $nanasisto)){
+			array_push($nanasi,$nanasisto[1]);
+		}
+	}
+
+	foreach ($nanasi as $mailaddr){
+		$mailad = openssl_decrypt($mailaddr, 'AES-256-CBC', $encrypt_key, 0, $encrypt_iv);
+		$_a = sendwebhook($bbs,$key,$from,$content,$subject2,$mailad,($max+1));
+		var_dump($_a);
+		echo $_a[4];
+	}
+
 	$subjecttxt = file_get_contents("../$bbs/subject.txt");
 	$subject2 = trim($subject2);
 	if (!isset($subject2)||$subject2 == ""){
@@ -403,7 +443,7 @@
 	echo '<html><head>
 	<title>書きこみました。</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
-	<meta http-equiv="Refresh" content="5;URL=/test/read.cgi/'.$bbs.'/'.$key.'/">
+	<meta http-equiv="Refresh" content="1;URL=/test/read.cgi/'.$bbs.'/'.$key.'/">
 	<meta name="msapplication-square70x70logo" content="/favicons/site-tile-70x70.png">
 	<meta name="msapplication-square150x150logo" content="/favicons/site-tile-150x150.png">
 	<meta name="msapplication-wide310x150logo" content="/favicons/site-tile-310x150.png">

@@ -298,7 +298,7 @@ function getCookie(key) {
 		echo '<body vlink="#AA0088" text="#000000" link="#0000FF" bgcolor="#EFEFEF" alink="#FF0000">';
 	}
 ?>
-<body vlink="<?=$settings["BBS_VLINK_COLOR"]?>" text="<?=$settings["BBS_TEXT_COLOR"]?>" link="<?=$settings["BBS_LINK_COLOR"]?>" bgcolor="<?=$settings["BBS_BG_COLOR"]?>" background="<?=$settings["BBS_BG_PICTURE"]?>" alink="<?=$settings["BBS_ALINK_COLOR"]?>">
+<body vlink="<?=$settings["BBS_VLINK_COLOR"]?>" text="<?=$settings["BBS_TEXT_COLOR"]?>" link="<?=$settings["BBS_LINK_COLOR"]?>" bgcolor="<?=$settings["BBS_BG_COLOR"]?>" alink="<?=$settings["BBS_ALINK_COLOR"]?>">
 <!-- [FC2 Analyzer] //analyzer.fc2.com/  -->
 <script language="javascript" src="//analyzer54.fc2.com/ana/processor.php?uid=2894165" type="text/javascript"></script>
 <noscript><div align="right"><img src="//analyzer54.fc2.com/ana/icon.php?uid=2894165&ref=&href=&wid=0&hei=0&col=0" /></div></noscript>
@@ -341,7 +341,7 @@ foreach ($dat as $s){
 	$LOG2 = trim($s);
 	$LOG2 = str_replace("&", "&amp;",$LOG2);
 	$LOG2 = htmlspecialchars_decode($LOG2);
-	list($name,$mail,$time,$message,$subject,$unko) = explode("<>",$LOG2);
+	list($name,$mail,$time,$message,$subject) = explode("<>",$LOG2);
 	$message = preg_replace_callback("/(https?):\/\/([\w;\/\?:\@&=\+\$,\-\.!~\*'\(\)%#]+)()/i", function ($matches)
 	{
 		// 通常は、$matches[0] がマッチした全体を表します。
@@ -423,13 +423,15 @@ if ($nodat != true){
 名前：<input type="text" name="FROM" value="<?=$cookName?>" size="19">
 E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="<?=$cookMail?>" size="19">
 <br>
-<textarea rows="5" cols="70" name="MESSAGE"></textarea><br>
+<textarea rows="5" cols="70" id="MESSAGE" name="MESSAGE"></textarea><br>
 </form>
+<br>
+<form id="form_id"><span style="background-color: #CECECE; padding: 2px;">ファイルを選択：<input type="file" id="file" onchange="selectFile()"></span></form>
 <div class="output hide"></div>
 <div style="margin-top:4em;">
 <?=$ver?>
 </div>
-
+<script src="/test/readv1.js"></script>
 <?php
 }
 if (isset($_GET["sp"])) {

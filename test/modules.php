@@ -342,7 +342,7 @@
 	function mb_str_shuffle($str)
 	{
 		$arr = mb_str_split($str,1,"Shift-JIS");
-		shuffle($arr);
+		openssl_shuffle($arr);
 		return implode("", $arr);
 	}
 
@@ -362,5 +362,76 @@
 			$ret[] = '';
 		}
 		return $ret;
+	}
+
+	function mt_shuffle(array &$array) {
+		$array = array_values($array);
+		for ($i = count($array) - 1; $i > 0; --$i) {
+			$j = mt_rand(0, $i);
+			$tmp = $array[$i];
+			$array[$i] = $array[$j];
+			$array[$j] = $tmp;
+		}
+	}
+
+	function openssl_rand($min = 0, $max = PHP_INT_MAX) {
+		$min = (int)$min;
+		$max = (int)$max;
+		$range = $max - $min;
+		if ($range <= 0) {
+			return $min;
+		}
+		$log    = log($range, 2);
+		$bytes  = (int)($log / 8) + 1;
+		$bits   = (int)$log + 1;
+		$filter = (int)(1 << $bits) - 1;
+		do {
+			$rand = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes))) & $filter;
+		} while ($rand > $range);
+		return $min + $rand;
+	}
+
+	function openssl_shuffle(array &$array) {
+		$array = array_values($array);
+		for ($i = count($array) - 1; $i > 0; --$i) {
+			$j = openssl_rand(0, $i);
+			$tmp = $array[$i];
+			$array[$i] = $array[$j];
+			$array[$j] = $tmp;
+		}
+	}
+
+	function sendwebhook($bbs,$key,$from,$content,$subject,$url,$count){
+		$POST_DATA = array(
+			'bbs' => $bbs,
+			'key' => $key,
+			'from' => strip_tags(mb_convert_encoding($from,"UTF-8","Shift-JIS")),
+			"content" => strip_tags(mb_convert_encoding($content,"UTF-8","Shift-JIS")),
+			'subject' => mb_convert_encoding($subject,"UTF-8","Shift-JIS"),
+			'url' => $url
+		);
+		$curl=curl_init("https://script.google.com/macros/s/AKfycbwX-8_eNB2OJDFL-H5cuXMJuxxcQQtudFLRXf3N1FmlkM-yl_1OsuKBglDZymRSxyoCgQ/exec");
+		curl_setopt($curl,CURLOPT_POST, TRUE);
+		// ↓はmultipartリクエストを許可していないサーバの場合はダメっぽいです
+		// @DrunkenDad_KOBAさん、Thanks
+		//curl_setopt($curl,CURLOPT_POSTFIELDS, $POST_DATA);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
+		curl_setopt($curl,CURLOPT_SSL_VERIFYPEER, FALSE);  // オレオレ証明書対策
+		curl_setopt($curl,CURLOPT_SSL_VERIFYHOST, FALSE);  // 
+		curl_setopt($curl,CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($curl,CURLOPT_COOKIEJAR,      'cookie');
+		curl_setopt($curl,CURLOPT_COOKIEFILE,     'tmp');
+		curl_setopt($curl,CURLOPT_FOLLOWLOCATION, TRUE); // Locationヘッダを追跡
+		//curl_setopt($curl,CURLOPT_REFERER,        "REFERER");
+		//curl_setopt($curl,CURLOPT_USERAGENT,      "USER_AGENT"); 
+		
+		$response = curl_exec( $curl );
+		$info = curl_getinfo($curl);
+
+		$errno = curl_errno($curl);
+		$error = curl_error($curl);
+
+		curl_close( $curl );
+		return [$response,$info,$error,$errno];
 	}
 ?>
