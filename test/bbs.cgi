@@ -216,6 +216,27 @@
 				$content = $content." <br> <span style=\"color: red;\"><small>スレッドがあったときにメール送信→".$nasi."</small></span>";
 			}
 		}
+
+		$nanasi = array();
+		$na = explode("\n",$cont);
+		foreach ($na as $a){
+			if (preg_match("/!gacha(.*)!3/",$a, $nanasisto)){
+				array_push($nanasi,$nanasisto[1]);
+			}
+		}
+		$maxna = count($nanasi);
+		if ($maxna == 1){
+			$content = $content." <br> <span style=\"color: red;\"><small>ガチャ(一個だけ！？)→".$nanasi[0]."</small></span>";
+		}else if ($maxna >= 2){
+			foreach($nanasi as $nasi){
+				$content = $content." <br> <span style=\"color: red;\"><small>ガチャ(追加)→".$nasi."</small></span>";
+			}
+		}
+
+		if (preg_match("/!maxres(.*)!3/",$cont, $maxres)){
+			$settings["BBS_RES_MAX"] = intval($maxres[1]);
+			$content = $content." <br> <span style=\"color: red;\"><small>最大レス数変更→".$maxres[1]."</small></span>";
+		}
 	}
 	if (preg_match("/!maxres(.*)!3/",$cont, $maxres)){
 		$settings["BBS_RES_MAX"] = intval($maxres[1]);
@@ -233,11 +254,25 @@
 
 		$maxna = count($nanasi);
 		if ($maxna != 0){
-			$from = $nanasi[rand(0,$maxna-1)];
+			$from = $nanasi[mt_rand(0,$maxna-1)];
 		}else{
 			$from = $settings["BBS_NONAME_NAME"];
 		}
 	}
+
+	$nanasi = array();
+	$na = explode("\n",$cont);
+	foreach ($na as $a){
+		if (preg_match("/!gacha(.*)!3/",$a, $nanasisto)){
+			array_push($nanasi,$nanasisto[1]);
+		}
+	}
+
+	$maxna = count($nanasi);
+	if ($maxna != 0){
+		$content = str_replace("!:gacha:","<span style=\"color: red;\"><small>ガチャの結果→</small></span>".$nanasi[mt_rand(0,$maxna-1)],$content);
+	}
+
 	$id = generateid();
 	checkacap();
 	if ($id != "ReportForm"){
@@ -248,11 +283,6 @@
 	if (!file_exists("../$bbs/dat/$key.dat") && substr($settings["BBS_TITLE"] , -1) == "+" && $iscap == false){
 		PrintBBSError("この掲示板は★付きの記者さんのみスレッドが立てられます","過去にキャップを配布しています。探してみてください。");
 		exit();
-	}else if (file_exists("../$bbs/dat/$key.dat") && substr($settings["BBS_TITLE"] , -1) == "+" && $iscap == true){
-		$subject = $subject." [".$id."★]";
-		if (!file_exists("../$bbs/dat/$key.dat")){
-			$subject2 = $subject;
-		}
 	}
 	$now = microtime(true);
 	$ms = (int)(($now - (int)$now) * 1000);

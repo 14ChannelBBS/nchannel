@@ -5,6 +5,7 @@
 ## How to Install
 ### Require
 > 詳しい環境については[こちらのページ(https://apple.14chan.cf/test/phpinfo.php)](https://apple.14chan.cf/test/phpinfo.php)からバージョンを確認してください。
+- .htaccessのAddTypeまたはRewriteEngineが使える環境
 - PHP Version 5.6.40-0+deb8u12以上
 - Server API→Apache 2.0 Handler
 - sendmailが使える環境(使えなくてもおｋ)
@@ -16,6 +17,10 @@
 ④最後に、/test/admin.phpにアクセスして、②で設定したキャップでログインして、``何をするか考えてみる：``の横にあるところでindex.htmlの再生成を選択肢、操作開始をクリック。  
   
 この手順で多分板ができます。あとは③と④を繰り返して板を増やしまくりましょう。
+## .htaccessのAddTypeが使えない環境について
+①まずすべての.cgiファイルの拡張子を.phpに変えます  
+②次に.cgiのアクセスを.phpにリライトするように.htaccessを書きます  
+③終わり
 ## mirror
 リポジトリのミラーたち  
 - [Github (https://github.com/14ChannelBBS/nchannel)](https://github.com/14ChannelBBS/nchannel)  
