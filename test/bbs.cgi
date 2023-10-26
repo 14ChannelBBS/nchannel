@@ -13,6 +13,7 @@
 	$mail = $_POST["mail"];
 	$content = $_POST["MESSAGE"];
 	$subject = ltrim($_POST["subject"]);
+	$issurenusi = false;
 	if (strpos("{\"result\":{\"ipv4_cidrs\":[\"173.245.48.0/20\",\"103.21.244.0/22\",\"103.22.200.0/22\",\"103.31.4.0/22\",\"141.101.64.0/18\",\"108.162.192.0/18\",\"190.93.240.0/20\",\"188.114.96.0/20\",\"197.234.240.0/22\",\"198.41.128.0/17\",\"162.158.0.0/15\",\"104.16.0.0/13\",\"104.24.0.0/14\",\"172.64.0.0/13\",\"131.0.72.0/22\"],\"ipv6_cidrs\":[\"2400:cb00::/32\",\"2606:4700::/32\",\"2803:f800::/32\",\"2405:b500::/32\",\"2405:8100::/32\",\"2a06:98c0::/29\",\"2c0f:f248::/32\"],\"etag\":\"38f79d050aa027e3be3865e495dcc9bc\"},\"success\":true,\"errors\":[],\"messages\":[]}",$_SERVER["REMOTE_ADDR"]) !== false){
 		$ipaddr = $_SERVER["REMOTE_ADDR"];
 	}else{
@@ -131,18 +132,18 @@
 	}
 	$from = preg_replace('/##(.*)$/',"",$from);
 	$content = preg_replace("/\r\n|\n|\r/", " <br> ",$content);
-	$content = preg_replace("/\*\*(.*)\*\*/", "<b>$1</b>",$content);
-	$content = preg_replace("/~~(.*)~~/", "<s>$1</s>",$content);
-	$content = preg_replace("/__(.*)__/", "<u>$1</u>",$content);
-	$content = preg_replace("/&lt;i&gt;(.*)&lt;\/i&gt;/","<i>$1</i>",$content);
-	$content = preg_replace("/```(.*)```/", "<pre style=\"font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;\">$1</pre>",$content);
-	$content = preg_replace("/\|\|(.*)\|\|/","<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='$1'\">ネタバレ注意(クリックして表示)</span>",$content);
+	$content = preg_replace("/\*\*(.*?)\*\*/", "<b>$1</b>",$content);
+	$content = preg_replace("/~~(.*?)~~/", "<s>$1</s>",$content);
+	$content = preg_replace("/__(.*?)__/", "<u>$1</u>",$content);
+	$content = preg_replace("/&lt;i&gt;(.*?)&lt;\/i&gt;/","<i>$1</i>",$content);
+	$content = preg_replace("/```(.*?)```/", "<pre style=\"font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;\">$1</pre>",$content);
+	$content = preg_replace("/\|\|(.*?)\|\|/","<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='$1'\">ネタバレ注意(クリックして表示)</span>",$content);
 	$content = preg_replace_callback(
-		"/&lt;shuffle&gt;(.*)&lt;\/shuffle&gt;/",
+		"/&lt;shuffle&gt;(.*?)&lt;\/shuffle&gt;/",
 		function ($matches) {
 			$string = str_replace("&", "&amp;",$matches[1]);
 			$string = htmlspecialchars_decode($string);
-			return mb_str_shuffle($string)." <br> <span style=\"color: red;\"><small>シャッフル、原文→「<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='".$matches[1]."'\">(クリックして表示)</span></small></span>";
+			return mb_str_shuffle($string)." <br> <span style=\"color: red;\"><small>シャッフル、原文→「<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='".$matches[1]."'\">(クリックして表示)</span></small></span><br>";
 		},
 		$content
 	);
@@ -164,6 +165,13 @@
 			},
 			$content
 		);
+		$content = preg_replace_callback(
+			"/!pass(.+)!3/",
+			function ($matches) {
+				return "!pass".password_hash($matches[1],PASSWORD_DEFAULT)."!3";
+			},
+			$content
+		);
 	}
 	$content = str_replace("\\*\\*", "**",$content);
 	$content = str_replace("\\~\\~", "~~",$content);
@@ -172,18 +180,46 @@
 	$content = str_replace("\\|\\|", "||",$content);
 	$from = str_replace("★", "☆", $from);
 	$from = str_replace("◆", "◇", $from);
-	if ($from == "fusianasan" || $from == "山崎渉" || $from == "tasukeruyo"){
-		$from = "</b>".$host."<b>";
-		$content = $content." <hr> <span style=\"color: blue;\"><i>".$_SERVER['HTTP_USER_AGENT']."</i></span>";
-	}
 	if (file_exists("../$bbs/dat/$key.dat")){
+		chmod("../$bbs/dat/$key.dat",0664);
+		chmod("../$bbs/log/$key.log",0664);
 		//先に読み出しておく
 		$dat = file("../$bbs/dat/$key.dat");
 		$max = count($dat);
 		list(,,,$cont,$subject2) = explode("<>",$dat[0]);
 		$cont = htmlspecialchars_decode($cont);
 		$cont = str_replace(" <br> ", "\n",$cont);
+
+		list($f,$m,$d,$c,$s) = explode("<>",$dat[0]);
+		if (preg_match("/!pass(.+)!3/",$mail, $ac) && preg_match("/!pass(.+)!3/",$cont, $ac2)){
+			if (password_verify($ac[1],$ac2[1])){
+				$issurenusi = true;
+			}
+		}
+		$mail = preg_replace("/!pass.+!3/", "",$mail);
+
+		if (preg_match_all("/!add:(.*?):/",$content, $ac,PREG_SET_ORDER) && $issurenusi){
+			foreach ($ac as $a){
+				$c = "$c <hr> <span style=\"color: red;\"><small>追記(".$date->format("Y/m/d H:i:s").")→</small>".$a[1]."</span>";
+			}
+			$dat[0] = "$f<>$m<>$d<>$c<>$s";
+			$ndat = implode("",$dat);
+
+			$cont = $c;
+		}
+
+		if (preg_match("/!chtt:(.*):/",$content, $ac) && $issurenusi){
+			$gomi = trim($s);
+			$s = $ac[1];
+			$c = "$c <hr> <span style=\"color: red;\"><small>スレッドタイトル変更(".$date->format("Y/m/d H:i:s").") 元→</small>".$gomi."</span>";
+			$dat[0] = "$f<>$m<>$d<>$c<>$s\n";
+			$ndat = implode("",$dat);
+
+			$subject2 = $s;
+		}
 	}else{
+		$key = time();
+		$issurenusi = true;
 		$cont = $content;
 		$cont = htmlspecialchars_decode($cont);
 		$cont = str_replace(" <br> ", "\n",$cont);
@@ -258,17 +294,42 @@
 			}
 		}
 
+		$nanasi = array();
+		$na = explode("\n",$cont);
+		foreach ($na as $a){
+			if (preg_match("/!pass(.+)!3/",$a, $nanasisto)){
+				array_push($nanasi,$nanasisto[1]);
+			}
+		}
+		$maxna = count($nanasi);
+		if ($maxna >= 1){
+			$content = $content." <br> <span style=\"color: red;\"><small>スレッドパス→".$nanasi[0]."</small></span>";
+		}
+
 		if (preg_match("/!maxres(.*)!3/",$cont, $maxres)){
 			$settings["BBS_RES_MAX"] = intval($maxres[1]);
 			$content = $content." <br> <span style=\"color: red;\"><small>最大レス数変更→".$maxres[1]."</small></span>";
+		}
+
+		if (strpos($cont,"!force774") !== false){
+			$content = $content." <br> <span style=\"color: red;\"><small>強制名無し</small></span>";
+		}
+		if (strpos($cont,"!forcekote") !== false){
+			$content = $content." <br> <span style=\"color: red;\"><small>強制コテハン</small></span>";
+		}
+		if (strpos($cont,"!noid") !== false){
+			$content = $content." <br> <span style=\"color: red;\"><small>ID&#127824;</small></span>";
 		}
 	}
 	if (preg_match("/!maxres(.*)!3/",$cont, $maxres)){
 		$settings["BBS_RES_MAX"] = intval($maxres[1]);
 	}
-	if ($from != ""){
+	if ($from != "" && strpos($cont,"!force774") === false){
 		$from = trip($from);
 	}else{
+		if (strpos($cont,"!forcekote") !== false){
+			PrintBBSError("このスレッドではコテハン必須なようです！","このスレッドは嫌われている可能性が高い");
+		}
 		$nanasi = array();
 		$na = explode("\n",$cont);
 		foreach ($na as $a){
@@ -283,6 +344,11 @@
 		}else{
 			$from = $settings["BBS_NONAME_NAME"];
 		}
+	}
+
+	if ($from == "fusianasan" || $from == "山崎渉" || $from == "tasukeruyo"){
+		$from = "</b>".$host."<b>";
+		$content = $content." <hr> <span style=\"color: blue;\"><i>".$_SERVER['HTTP_USER_AGENT']."</i></span>";
 	}
 
 	$nanasi = array();
@@ -300,6 +366,12 @@
 
 	$id = generateid();
 	checkacap();
+	if ($issurenusi){
+		$id = $id."<span style=\"color: red;\"><small>主</small></span>";
+	}
+	if (strpos($cont,"!noid") !== false){
+		$id = "";
+	}
 	if ($id != "ReportForm"){
 		setcookie("cookName",$_POST["FROM"],(time()+60*60*24*(365*10)));
 		setcookie("cookMail",$_POST["mail"],(time()+60*60*24*(365*10)));
@@ -312,12 +384,7 @@
 	$now = microtime(true);
 	$ms = (int)(($now - (int)$now) * 1000);
 	$msStr = str_pad($ms, 2, 0, STR_PAD_LEFT);
-	if(!file_exists("../$bbs/dat/$key.dat")) {
-		$key = time();
-	}else{
-		chmod("../$bbs/dat/$key.dat",0664);
-		chmod("../$bbs/log/$key.log",0664);
-	}
+
 	//もしもレス数がBBS_RES_MAXを超えてるならば、エラー
 	if ($max >= intval($settings["BBS_RES_MAX"])){
 		PrintBBSError("このスレッドはもう書けません！","このスレッドは".$settings["BBS_RES_MAX"]."レスまで書けたみたいです");
@@ -366,10 +433,18 @@
 
 
 	//もしもレス数がBBS_RES_MAXを超えているならば、Over <BBS_RES_MAX> Threadを出す
-	if (($max+1) >= intval($settings["BBS_RES_MAX"])){
-		file_put_contents("../$bbs/dat/$key.dat","$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\nOver ".$settings["BBS_RES_MAX"]." Thread<><>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr."<>このスレッドは".$settings["BBS_RES_MAX"]."レスを超えました。<br> 続きは<a href=\"/\">14Channel BBS</a>でどうぞ。<>\n",FILE_APPEND|LOCK_EX);
+	if (isset($ndat)){
+		if (($max+1) >= intval($settings["BBS_RES_MAX"])){
+			file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\nOver ".$settings["BBS_RES_MAX"]." Thread<><>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr."<>このスレッドは".$settings["BBS_RES_MAX"]."レスを超えました。<br> 続きは<a href=\"/\">14Channel BBS</a>でどうぞ。<>\n",LOCK_EX);
+		}else{
+			file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\n",LOCK_EX);
+		}
 	}else{
-		file_put_contents("../$bbs/dat/$key.dat","$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\n",FILE_APPEND|LOCK_EX);
+		if (($max+1) >= intval($settings["BBS_RES_MAX"])){
+			file_put_contents("../$bbs/dat/$key.dat","$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\nOver ".$settings["BBS_RES_MAX"]." Thread<><>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr."<>このスレッドは".$settings["BBS_RES_MAX"]."レスを超えました。<br> 続きは<a href=\"/\">14Channel BBS</a>でどうぞ。<>\n",FILE_APPEND|LOCK_EX);
+		}else{
+			file_put_contents("../$bbs/dat/$key.dat","$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\n",FILE_APPEND|LOCK_EX);
+		}
 	}
 	
 	chmod("../$bbs/dat/$key.dat",0664);
@@ -430,8 +505,9 @@
 	if (!isset($subject2)||$subject2 == ""){
 		$subject2 = '[ここ壊れてます]';
 	}
-	$subjecttxt = str_replace("$key.dat<>$subject2 (".$max.")\n", "", $subjecttxt);
-	//$subjecttxt = preg_replace("/$key\.dat<>$subject2 \(.*\)\n/", "", $subjecttxt);
+	//$subjecttxt = str_replace("$key.dat<>$subject2 (".$max.")\n", "", $subjecttxt);
+	//$subjecttxt = str_replace("$key.dat<>$gomi (".$max.")\n", "", $subjecttxt);
+	$subjecttxt = preg_replace("/$key\.dat<>.*\n/", "", $subjecttxt);
 	if (false === strpos("sage", $mail)) {
 		$subjecttxt = "$key.dat<>$subject2 (".($max+1).")\n$subjecttxt";
 	}else if (false !== strpos("sage",$mail)) {

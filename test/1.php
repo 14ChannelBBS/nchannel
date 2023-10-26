@@ -276,6 +276,7 @@ function getCookie(key) {
 		?>
 	}
 </script>
+<script src="/test/jquery.inline-attachment.js"></script>
 <?php
 		if (isset($_GET["sp"])) {
 			echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">';
@@ -289,6 +290,12 @@ function getCookie(key) {
 					</style>';
 		}
 ?>
+<style>
+	textarea.dragover {
+    border: dashed 6px #ccc;
+    padding: 12px 6px 0px;
+}
+</style>
 </head>
 
 <?php
@@ -426,7 +433,7 @@ E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="<?
 <textarea rows="5" cols="70" id="MESSAGE" name="MESSAGE"></textarea><br>
 </form>
 <br>
-<form id="form_id"><span style="background-color: #CECECE; padding: 2px;">ファイルを選択：<input type="file" id="file" onchange="selectFile()"></span></form>
+<form id="form1"><span style="background-color: #CECECE; padding: 2px;">ファイルを選択：<input type="file" name="file" id="file"></span></form>
 <div class="output hide"></div>
 <div style="margin-top:4em;">
 <?=$ver?>

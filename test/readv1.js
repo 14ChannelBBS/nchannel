@@ -1,27 +1,74 @@
-  function selectFile() {
-    if (document.getElementById("file").value === "") {
-      console.log("選択しなさい");
-    }
-    else {
-		const form = document.forms[1];
-	  	const fd = new FormData(form);
-	 	const xhr = new XMLHttpRequest();
-	 	xhr.open("POST", "/upload/upload.php");
-		// (2) ファイルが選択されたときに処理を実行するようイベントリスナーに登録
-		// (3) 選択したファイルをFormDataオブジェクトにセット
+const f = document.getElementById('file');
+f.addEventListener('change', (evt) => {
+  const fileIn = evt.target;
+  const form = document.getElementById('form1');
+  const fd = new FormData(form);
+  const MESSAGE = document.getElementById('MESSAGE');
+  const xhr = new XMLHttpRequest()
 
-		// (4) ファイル送信
-		xhr.send(fd);
+  xhr.open("POST", "/upload/upload.php");
 
-		// (5) 通信が完了したらレスポンスをコンソールに出力する
-		xhr.addEventListener('readystatechange', () => {
+  // アップロード関連イベント
+  xhr.upload.addEventListener('loadstart', (evt) => {
+	// アップロード開始
+  });
+  
+  xhr.upload.addEventListener('progress', (evt) => {
+	// アップロード進行パーセント
+	const percent = (evt.loaded / evt.total * 100).toFixed(1);
+	console.log(`++ xhr.upload: progress ${percent}%`);
+  });
+  
+  xhr.upload.addEventListener('abort', (evt) => {
+	// アップロード中断
+	console.log('++ xhr.upload: abort (Upload aborted)');
+  });
+  
+  xhr.upload.addEventListener('error', (evt) => {
+	// アップロードエラー
+	console.log('++ xhr.upload: error (Upload failed)');
+  });
+  
+  xhr.upload.addEventListener('load', (evt) => {
+	// アップロード正常終了
+	console.log('++ xhr.upload: load (Upload Completed Successfully)');
+		// Basic Events
+		xhr.addEventListener('load', (evt) => {
+			console.log('** xhr: load');
+			const response = xhr.response;
+			MESSAGE.value = MESSAGE.value+"\n"+response;
+			console.log(response);
+			form.file.value = "";
+		})
+	});
+  
+  xhr.upload.addEventListener('timeout', (evt) => {
+	// アップロードタイムアウト
+	console.log('++ xhr.upload: timeout');
+  });
+  
+  xhr.upload.addEventListener('loadend', (evt) => {
+	// アップロード終了 (エラー・正常終了両方)
+	console.log('++ xhr.upload: loadend (Upload Finished)');
+  });
+  
+  xhr.send(fd);
+});
 
-			if( xhr.readyState === 4 && xhr.status === 200) {
-				console.log(xhr.response);
-				let element = document.getElementById('MESSAGE');
-				element.value = element.value+"\n"+xhr.response
-			}
-			document.getElementById("File").value = ""
-		});
-    }
-  }
+$(function(){
+	// ファイル貼り付け
+	$('textarea').inlineattachment({
+	  uploadUrl: '/upload/upload.php',
+	  allowedTypes: ['*'],
+	  remoteFilename: (file)=>{return file.name},
+	  urlText: (filename)=>{
+		return `${filename}`
+	  }
+	});
+	$('textarea').on('dragenter dragover', function() {
+	  $(this).addClass('dragover')
+	})
+	$('textarea').on('drop dragleave dragend', function() {
+	  $(this).removeClass('dragover')
+	})
+  });
