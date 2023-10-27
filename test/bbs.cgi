@@ -14,6 +14,7 @@
 	$content = $_POST["MESSAGE"];
 	$subject = ltrim($_POST["subject"]);
 	$issurenusi = false;
+	$isthreadstopped = false;
 	if (strpos("{\"result\":{\"ipv4_cidrs\":[\"173.245.48.0/20\",\"103.21.244.0/22\",\"103.22.200.0/22\",\"103.31.4.0/22\",\"141.101.64.0/18\",\"108.162.192.0/18\",\"190.93.240.0/20\",\"188.114.96.0/20\",\"197.234.240.0/22\",\"198.41.128.0/17\",\"162.158.0.0/15\",\"104.16.0.0/13\",\"104.24.0.0/14\",\"172.64.0.0/13\",\"131.0.72.0/22\"],\"ipv6_cidrs\":[\"2400:cb00::/32\",\"2606:4700::/32\",\"2803:f800::/32\",\"2405:b500::/32\",\"2405:8100::/32\",\"2a06:98c0::/29\",\"2c0f:f248::/32\"],\"etag\":\"38f79d050aa027e3be3865e495dcc9bc\"},\"success\":true,\"errors\":[],\"messages\":[]}",$_SERVER["REMOTE_ADDR"]) !== false){
 		$ipaddr = $_SERVER["REMOTE_ADDR"];
 	}else{
@@ -173,6 +174,20 @@
 			$content
 		);
 	}
+	$content = preg_replace_callback(
+		"/!odai:(\d+):/",
+		function ($matches) {
+			$odais = array(
+				"好きな食べ物は何？",
+				"好きな人は誰？",
+				"なんの仕事をしているの？",
+				"名前は何？",
+				"住んでいるところはどこ？",
+			);
+			return "<span style=\"color: red;\"><small>&gt;&gt;".$matches[1]." に対してお題→</small></span>".$odais[openssl_rand(0,(count($odais) - 1))];
+		},
+		$content
+	);
 	$content = str_replace("\\*\\*", "**",$content);
 	$content = str_replace("\\~\\~", "~~",$content);
 	$content = str_replace("\\_\\_", "__",$content);
@@ -189,6 +204,11 @@
 		list(,,,$cont,$subject2) = explode("<>",$dat[0]);
 		$cont = htmlspecialchars_decode($cont);
 		$cont = str_replace(" <br> ", "\n",$cont);
+
+		if ($dat[(count($dat)-1)] == "停止しました。。。<>停止<>停止<>真・スレッドストッパー。。。(￣ー￣)ﾆﾔﾘ<>\n"){
+			PrintBBSError("このスレッドはストップされてるぽいです。。。","スレッドストッパーでも発動したんじゃないですかね？");
+			exit();
+		}
 
 		list($f,$m,$d,$c,$s) = explode("<>",$dat[0]);
 		if (preg_match("/!pass(.+)!3/",$mail, $ac) && preg_match("/!pass(.+)!3/",$cont, $ac2)){
@@ -216,6 +236,11 @@
 			$ndat = implode("",$dat);
 
 			$subject2 = $s;
+		}
+
+		if (strpos($content,"!stop") !== false && $issurenusi){
+			$isthreadstopped = true;
+			$ndat = implode("",$dat);
 		}
 	}else{
 		$key = time();
@@ -431,13 +456,21 @@
 		fclose($fp);
 	}
 
-
 	//もしもレス数がBBS_RES_MAXを超えているならば、Over <BBS_RES_MAX> Threadを出す
 	if (isset($ndat)){
-		if (($max+1) >= intval($settings["BBS_RES_MAX"])){
-			file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\nOver ".$settings["BBS_RES_MAX"]." Thread<><>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr."<>このスレッドは".$settings["BBS_RES_MAX"]."レスを超えました。<br> 続きは<a href=\"/\">14Channel BBS</a>でどうぞ。<>\n",LOCK_EX);
+		if ($isthreadstopped == true){
+			$_a = "停止しました。。。<>停止<>停止<>真・スレッドストッパー。。。(￣ー￣)ﾆﾔﾘ<>";
+			if (($max+1) >= intval($settings["BBS_RES_MAX"])){
+				file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\n$_a\nOver ".$settings["BBS_RES_MAX"]." Thread<><>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr."<>このスレッドは".$settings["BBS_RES_MAX"]."レスを超えました。<br> 続きは<a href=\"/\">14Channel BBS</a>でどうぞ。<>\n",LOCK_EX);
+			}else{
+				file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\n$_a\n",LOCK_EX);
+			}
 		}else{
-			file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\n",LOCK_EX);
+			if (($max+1) >= intval($settings["BBS_RES_MAX"])){
+				file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\nOver ".$settings["BBS_RES_MAX"]." Thread<><>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr."<>このスレッドは".$settings["BBS_RES_MAX"]."レスを超えました。<br> 続きは<a href=\"/\">14Channel BBS</a>でどうぞ。<>\n",LOCK_EX);
+			}else{
+				file_put_contents("../$bbs/dat/$key.dat",$ndat."$from<>$mail<>".$date->format('Y/m/d')."(".$weeks[intval($date->format('w'))].") ".$date->format('H:i:s').".".$msStr." ID:$id<>$content<>$subject\n",LOCK_EX);
+			}
 		}
 	}else{
 		if (($max+1) >= intval($settings["BBS_RES_MAX"])){
@@ -672,19 +705,21 @@ function PrintBBSError($str1,$str2){
 		<ul style="line-height:1.5;">
 		お使いのプロバイダさんが、<b>原因となった人に対応</b>するまで規制は続きます。<br>
 		個別の対応・進展については、プロバイダさんへお尋ねください。<br>
-		<small>その他、５Channel BBSについては、
-		<a href="//5ch.net/qa/">初心者の質問</a>
-		<a href="//5ch.net/accuse/">批判要望</a>
-		<a href="//5ch.net/operate/">運用情報</a>
-		<a href="//5ch.net/operatex/">運用臨時</a>
+		<small>その他、14Channel BBSについては、
+		<a href="/qa/">初心者の質問</a>
+		<a href="/accuse/">批判要望</a>
+		<a href="/operate/">運用情報</a>
+		<a href="/operatex/">運用臨時</a>
 		などへどうぞ。</small>
 		</ul><br>
+		<!--
 		<font size="+1" color="#DD3300"><b>● 浪人について</b></font>
 		<ul style="line-height:1.5;">
 		浪人を導入することで規制が緩和されます。<br>
 		浪人の購入は <a href="//premium.5ch.net/">こちら</a> から<br>
 		既に浪人をお持ちなら <a href="//login.5ch.net/login.php">ログイン</a> することで有効になります。 <br>
 		</ul>
+		-->
 		
 		</ul></body></html>';
 	}

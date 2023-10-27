@@ -73,7 +73,7 @@
 						if (unlink($_POST["thread"])){
 							$subjecttxt = file_get_contents($_POST["bbs"]."/subject.txt");
 							$subject = trim($subject2);
-							$subjecttxt = str_replace(substr($dir1, 11)."<>$subject (".$max.")\n", "", $subjecttxt);
+							$subjecttxt = preg_replace("/".substr($dir1, 11)."<>.*\n/", "", $subjecttxt);
 							file_put_contents("../$bbs/subject.txt",$subjecttxt,LOCK_EX);
 							generateHTML(substr($_POST["bbs"], 3));
 							echo "Operation Successful";
