@@ -378,27 +378,27 @@ foreach ($dat as $s){
 	//$message = preg_replace("/(https?)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)\.(mp4|avi|webm)/i", "<small><a href=\"$1$2.$3\">$1$2.$3</a></small> <br> <video controls width=\"30%\" height=\"30%\" src=\"$1$2.$3\"></video>", $message);
 	$message = preg_replace("/&gt;&gt;(\d+)/", "<a href=\"$1\">&gt;&gt;$1</a>", $message);
 	$mailto = $mail ? "<a href=\"mailto:$mail\"><span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span></a>" : "<span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span>";
-	$time = "$time <button title=\"このレスを読み上げてもらう\" onclick=\"ttsThread('".htmlspecialchars(strip_tags(str_replace(" <br> ","、",$message)),ENT_NOQUOTES,"Shift_JIS",true)."',".$_COOKIE["character"].",'');\">&#x1f50a;</button><a href=\"/test/report.cgi?url=https://".$_SERVER["SERVER_NAME"]."/test/read.cgi/$bbs/$key/\" title=\"このレスを通報する\"><button>&#x1f4e2;</button></a>";
+	$time = "$time <button title=\"このレスを読み上げてもらう\" onclick=\"ttsThread('".htmlspecialchars(preg_replace("/(https?):\/\/([\w;\/\?:\@&=\+\$,\-\.!~\*'\(\)%#]+)()/i","、リンク省略、",strip_tags(str_replace(" <br> ","、",$message))),ENT_NOQUOTES,"Shift_JIS",true)."',".$_COOKIE["character"].",'');\">&#x1f50a;</button><a href=\"/test/report.cgi?url=https://".$_SERVER["SERVER_NAME"]."/test/read.cgi/$bbs/$key/\" title=\"このレスを通報する\"><button>&#x1f4e2;</button></a>";
 	if ($mode != ""){
 		if ($lastmode){
 			if (($count >= ($max - $lasth)) || $count == 1){
-				echo "<dt>$count ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
+				echo "<dt>$count ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
 			}
 		}elseif ($ko_ko_mode || $ko__mode || $_ko_mode){
 			if (($count >= intval($ko_ko[1]) && $count <= intval($ko_ko[2]) && $ko_ko_mode) || $count == 1){
-				echo "<dt>$count ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
+				echo "<dt>$count ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
 			}elseif (($count >= intval($ko_[1]) && $ko__mode) || $count == 1){
-				echo "<dt>$count ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
+				echo "<dt>$count ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
 			}elseif (($count <= intval($_ko[1]) && $_ko_mode) || $count == 1){
-				echo "<dt>$count ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
+				echo "<dt>$count ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
 			}
 		}else{
 			if ($count == $mode || $count == 1){
-				echo "<dt>$count ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
+				echo "<dt>$count ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
 			}
 		}
 	}else{
-		echo "<dt>$count ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
+		echo "<dt>$count ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
 	}
 	if ($count == $max){
 		break;

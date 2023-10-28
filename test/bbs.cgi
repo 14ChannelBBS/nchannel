@@ -102,6 +102,16 @@
 			$a = file_put_contents("../robotcheck_bypass.txt",$_COOKIE["2ch_X"]."\n",FILE_APPEND);
 		}
 	}
+	if (file_exists("../$bbs/dat/$key.dat")){
+		chmod("../$bbs/dat/$key.dat",0664);
+		chmod("../$bbs/log/$key.log",0664);
+		//先に読み出しておく
+		$dat = file("../$bbs/dat/$key.dat");
+		$max = count($dat);
+		list(,,,$cont,$subject2) = explode("<>",$dat[0]);
+		$cont = htmlspecialchars_decode($cont);
+		$cont = str_replace(" <br> ", "\n",$cont);
+	}
 	//PrintBBSError("準備中です！",$"Twitter(<a href=\"https://twitter.com/14ChannelBBS\">@14ChannelBBS</a>)や<a href=\"https://discord.gg/BtNdCYStxn\">Discord</a>で最新情報をご確認ください！");
 	$date = new DateTime();
 	$weeks = explode("/",$settings["BBS_YMD_WEEKS"]);
@@ -139,6 +149,15 @@
 	$content = preg_replace("/&lt;i&gt;(.*?)&lt;\/i&gt;/","<i>$1</i>",$content);
 	$content = preg_replace("/```(.*?)```/", "<pre style=\"font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;\">$1</pre>",$content);
 	$content = preg_replace("/\|\|(.*?)\|\|/","<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='$1'\">ネタバレ注意(クリックして表示)</span>",$content);
+	$content = preg_replace("/&lt;fluorescence&gt;(.*?)&lt;\/fluorescence&gt;/","<span style=\"  position: relative;  background: linear-gradient(transparent 40%, yellow 40%);\">$1</span>",$content);
+	$content = preg_replace_callback(
+		"/&lt;fluorescence color=(.+)&gt;(.*?)&lt;\/fluorescence&gt;/",
+		function ($matches) {
+			$matches[1] = str_replace("&amp;","#",$matches[1]);
+			return "<span style=\"  position: relative;  background: linear-gradient(transparent 40%, ".$matches[1]." 40%);\">".$matches[2]."</span>";
+		},
+		$content
+	);
 	$content = preg_replace_callback(
 		"/&lt;shuffle&gt;(.*?)&lt;\/shuffle&gt;/",
 		function ($matches) {
@@ -196,15 +215,6 @@
 	$from = str_replace("★", "☆", $from);
 	$from = str_replace("◆", "◇", $from);
 	if (file_exists("../$bbs/dat/$key.dat")){
-		chmod("../$bbs/dat/$key.dat",0664);
-		chmod("../$bbs/log/$key.log",0664);
-		//先に読み出しておく
-		$dat = file("../$bbs/dat/$key.dat");
-		$max = count($dat);
-		list(,,,$cont,$subject2) = explode("<>",$dat[0]);
-		$cont = htmlspecialchars_decode($cont);
-		$cont = str_replace(" <br> ", "\n",$cont);
-
 		if ($dat[(count($dat)-1)] == "停止しました。。。<>停止<>停止<>真・スレッドストッパー。。。(￣ー￣)ﾆﾔﾘ<>\n"){
 			PrintBBSError("このスレッドはストップされてるぽいです。。。","スレッドストッパーでも発動したんじゃないですかね？");
 			exit();
@@ -312,10 +322,10 @@
 		}
 		$maxna = count($nanasi);
 		if ($maxna == 1){
-			$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにDiscordのWebhook→".$nanasi[0]."</small></span>";
+			$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにDiscordのWebhook→".substr($nanasi[0],0,10)."(省略)</small></span>";
 		}else if ($maxna >= 2){
 			foreach($nanasi as $nasi){
-				$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにDiscordのWebhook→".$nasi."</small></span>";
+				$content = $content." <br> <span style=\"color: red;\"><small>レスがあったときにDiscordのWebhook→".substr($nasi,0,10)."(省略)</small></span>";
 			}
 		}
 
@@ -529,8 +539,6 @@
 	foreach ($nanasi as $mailaddr){
 		$mailad = openssl_decrypt($mailaddr, 'AES-256-CBC', $encrypt_key, 0, $encrypt_iv);
 		$_a = sendwebhook($bbs,$key,$from,$content,$subject2,$mailad,($max+1));
-		var_dump($_a);
-		echo $_a[4];
 	}
 
 	$subjecttxt = file_get_contents("../$bbs/subject.txt");
@@ -543,7 +551,7 @@
 	$subjecttxt = preg_replace("/$key\.dat<>.*\n/", "", $subjecttxt);
 	if (false === strpos("sage", $mail)) {
 		$subjecttxt = "$key.dat<>$subject2 (".($max+1).")\n$subjecttxt";
-	}else if (false !== strpos("sage",$mail)) {
+	}else if (false !== strpos("ksage",$mail)) {
 		$subjecttxt = "$subjecttxt$key.dat<>$subject2 (".($max+1).")\n";
 	}
 	file_put_contents("../$bbs/subject.txt",$subjecttxt,LOCK_EX);
@@ -552,7 +560,8 @@
 	echo '<html><head>
 	<title>書きこみました。</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
-	<meta http-equiv="Refresh" content="1;URL=/test/read.cgi/'.$bbs.'/'.$key.'/">
+	<meta http-equiv="Refresh" content="3;URL=/test/read.cgi/'.$bbs.'/'.$key.'/">
+	<meta name="robots" content="noindex">
 	<meta name="msapplication-square70x70logo" content="/favicons/site-tile-70x70.png">
 	<meta name="msapplication-square150x150logo" content="/favicons/site-tile-150x150.png">
 	<meta name="msapplication-wide310x150logo" content="/favicons/site-tile-310x150.png">
@@ -633,6 +642,7 @@ function PrintBBSError($str1,$str2){
 	}else{
 		echo '<html><!-- 2ch_X:error --><head>
 		<title>ＥＲＲＯＲ！</title>
+		<meta name="robots" content="noindex">
 		<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
 		<meta name="msapplication-square70x70logo" content="/favicons/site-tile-70x70.png">
 		<meta name="msapplication-square150x150logo" content="/favicons/site-tile-150x150.png">

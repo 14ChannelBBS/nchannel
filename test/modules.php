@@ -28,6 +28,11 @@
 				break;
 			}
 		}
+
+		foreach ($subject as $subjt){
+			$subjt = preg_replace("/(.*).dat<>(.*)\n/", "<a href=\"/test/read.cgi/$bbs/$1/l50\">$count: $2</a>", $subjt);
+			$subjetttt = "$subjetttt\n$subjt";
+		}
 	
 		$count = 0;
 		$max = 0;
@@ -112,7 +117,7 @@
 					$message = preg_replace("/&gt;&gt;(\d+)/", "<a href=\"/test/read.cgi/$bbs/$key/$1\">&gt;&gt;$1</a>", $message);
 					$mailto = $mail ? "<a href=\"mailto:$mail\"><span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span></a>" : "<span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span>";
 					if ($countt == 1 || $countt >= $max-9){
-						$threadvn = "$threadvn\n"."<dt>$countt ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
+						$threadvn = "$threadvn\n"."<dt>$countt ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
 					}
 	
 					if ($countt == $max){
@@ -121,7 +126,7 @@
 				}
 			}
 	
-			$threadv = $threadv."\n".'<table style="margin-bottom:1.2em;" width="95%" cellspacing="7" cellpadding="3" border="1" bgcolor="#EFEFEF" align="center">
+			$threadv = $threadv."\n".'<table style="table-layout: fixed; margin-bottom:1.2em;" width="95%" cellspacing="7" cellpadding="3" border="1" bgcolor="#EFEFEF" align="center">
 			<tbody><tr>
 				<td>
 				<a name="'.$count.'"></a>
@@ -422,6 +427,7 @@
 		curl_setopt($curl,CURLOPT_COOKIEJAR,      'cookie');
 		curl_setopt($curl,CURLOPT_COOKIEFILE,     'tmp');
 		curl_setopt($curl,CURLOPT_FOLLOWLOCATION, TRUE); // Locationヘッダを追跡
+		curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 		//curl_setopt($curl,CURLOPT_REFERER,        "REFERER");
 		//curl_setopt($curl,CURLOPT_USERAGENT,      "USER_AGENT"); 
 		

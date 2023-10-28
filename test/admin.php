@@ -27,6 +27,7 @@
 		if ($isadmin){
 			if (!isset($_POST["operation"])){
 ?>
+<meta name="robots" content="noindex">
 <h1>キャップ持ち用管理ページ（笑）</h1>
 <?=$from?>(<?=$id?>)さん、こんにちは<br>
 <form action="/test/admin.php" method="post">
@@ -59,7 +60,18 @@
 <?php
 			}else{
 				if ($_POST["operation"] == "0"){
-					generateHTML(substr($_POST["bbs"], 3));
+					if ($_POST["bbs"] != "all"){
+						generateHTML(substr($_POST["bbs"], 3));
+					}else{
+						$dir = '../';
+						$list1 = glob($dir . '*', GLOB_ONLYDIR);
+					
+						foreach ($list1 as $dir1) {
+							if (file_exists($dir1.'/SETTING.TXT')) {
+								generateHTML(substr($dir1, 3));
+							}
+						}
+					}
 					echo "Operation Successful";
 					exit();
 				}else if ($_POST["operation"] == "1"){
@@ -107,11 +119,13 @@
 		}
 	}else{
 ?>
+<meta name="robots" content="noindex">
 <h1>キャップ持ち用管理ページ（笑）</h1>
 <?=$from?>(<?=$id?>)、こんにちは<br>
 <form action="/test/admin.php" method="post">
 板を選択してみる：<select name="bbs" required>
 <option value="">--選択してください--</option>
+<option value="all">すべての板</option>
 <?php
 	$dir = '../';
 	$list1 = glob($dir . '*', GLOB_ONLYDIR);
