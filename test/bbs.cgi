@@ -51,6 +51,8 @@
 	if (isset($_POST["cf-turnstile-response"])){
 		//シークレット(将来いつ使うかは不明)
 		$id = bin2hex(openssl_random_pseudo_bytes(8));
+		//公開しても良いクライアントIDを生成
+		$clientid = bin2hex(openssl_random_pseudo_bytes(16));
 
 		$POST_DATA = array(
 			'secret' => $turnstile_secret,
@@ -84,6 +86,7 @@
 			exit();
 		}else{
 			setcookie("2ch_X", $id, (time()+60*60*24*(365*10)));
+			setcookie("client_id",$clientid,(time()+60*60*24*(365*10)));
 			$a = file_put_contents("../robotcheck_bypass.txt","$id\n",FILE_APPEND);
 			$checkrobot = true;
 		}
