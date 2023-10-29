@@ -15,6 +15,7 @@
 	$subject = ltrim($_POST["subject"]);
 	$issurenusi = false;
 	$isthreadstopped = false;
+	$client_id = $_COOKIE["clientid"]; //Client ID
 	if (strpos("{\"result\":{\"ipv4_cidrs\":[\"173.245.48.0/20\",\"103.21.244.0/22\",\"103.22.200.0/22\",\"103.31.4.0/22\",\"141.101.64.0/18\",\"108.162.192.0/18\",\"190.93.240.0/20\",\"188.114.96.0/20\",\"197.234.240.0/22\",\"198.41.128.0/17\",\"162.158.0.0/15\",\"104.16.0.0/13\",\"104.24.0.0/14\",\"172.64.0.0/13\",\"131.0.72.0/22\"],\"ipv6_cidrs\":[\"2400:cb00::/32\",\"2606:4700::/32\",\"2803:f800::/32\",\"2405:b500::/32\",\"2405:8100::/32\",\"2a06:98c0::/29\",\"2c0f:f248::/32\"],\"etag\":\"38f79d050aa027e3be3865e495dcc9bc\"},\"success\":true,\"errors\":[],\"messages\":[]}",$_SERVER["REMOTE_ADDR"]) !== false){
 		$ipaddr = $_SERVER["REMOTE_ADDR"];
 	}else{
@@ -87,7 +88,8 @@
 		}else{
 			setcookie("2ch_X", $id, (time()+60*60*24*(365*10)));
 			setcookie("client_id",$clientid,(time()+60*60*24*(365*10)));
-			$a = file_put_contents("../robotcheck_bypass.txt","$id\n",FILE_APPEND);
+			file_put_contents("../robotcheck_bypass.txt","$id<>$clientid\n",FILE_APPEND);
+			chmod("../robotcheck_bypass.txt",0660);
 			$checkrobot = true;
 		}
 	}else{
@@ -384,7 +386,7 @@
 
 	if ($from == "fusianasan" || $from == "山崎渉" || $from == "tasukeruyo"){
 		$from = "</b>".$host."<b>";
-		$content = $content." <hr> <span style=\"color: blue;\"><i>".$_SERVER['HTTP_USER_AGENT']."</i></span>";
+		$content = $content." <hr> <span style=\"color: blue;\"><i>".$_SERVER['HTTP_USER_AGENT']."</i></span> <hr> <span style=\"color: blue;\"><i>".$client_id."</i></span>";
 	}
 
 	$nanasi = array();
@@ -747,9 +749,6 @@ function PrintRobotCheckAndRules($settings,$flag = false) {
 	global $host;
 	global $sitekey;
 
-	//シークレット(将来いつ使うかは不明)
-	$id = bin2hex(openssl_random_pseudo_bytes(8));
-
 	if ($flag == true){
 		$string = "<br><font size=\"4\" color=\"#FF0000\"><b>認証に失敗しました。もう一度認証をお願いします。</b></font>";
 	}
@@ -787,9 +786,7 @@ function PrintRobotCheckAndRules($settings,$flag = false) {
 <p>
 現在、荒らし対策でロボットチェックを通過していないと書きこみできないようにしています。<br>
 <font size="2">(cookieを設定するとこの画面はでなくなります。)</font><br><br>
-<b>専ブラを使用している人やCookieが保存できない環境の人はWebブラウザから認証し、以下の文字列を名前欄に入れてください</b><br>
-<名前>#tripkey##'.$id.'<br>
-<b>それでもだめだった人は、お手数ですが nennneko5787 at gmail dot com に、以下のログを添付してお問い合わせください。(atは@に、dotは.に置き換えてください)</b><br>
+<b>専ブラを使用している人やCookieが保存できない環境の人はWebブラウザから認証し、<a href="https://'.$_SERVER["SERVER_NAME"].'/test/authkey.php">https://'.$_SERVER["SERVER_NAME"].'/test/authkey.php</a>にアクセスし、認証キーを入手してください。</b><br>
 <pre>
 bbs:'.$bbs.'
 key:'.$key.'

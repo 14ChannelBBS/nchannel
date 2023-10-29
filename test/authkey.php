@@ -71,7 +71,8 @@
 		}else{
 			setcookie("2ch_X", $id, (time()+60*60*24*(365*10)));
 			setcookie("client_id",$clientid,(time()+60*60*24*(365*10)));
-			$a = file_put_contents("../robotcheck_bypass.txt","$id\n",FILE_APPEND);
+			file_put_contents("../robotcheck_bypass.txt","$id<>$clientid\n",FILE_APPEND);
+			chmod("../robotcheck_bypass.txt",0660);
 			echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 			<html>
 			<head>
