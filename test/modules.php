@@ -77,7 +77,7 @@
 							return "<a href=\"//jump.14chan.cf/".$matches[1]."://".$matches[2]."\" target=\"_blank\">".$matches[1]."://".$matches[2]."</a>";
 						}
 					}, $message);
-					$message = preg_replace("/&gt;&gt;(\d+)/", "<a href=\"/test/read.cgi/$bbs/$key/$1\">&gt;&gt;$1</a>", $message);
+					$message = preg_replace("/&gt;&gt;(\d+)/", "<a href=\"/test/read.cgi/$bbs/".$kagi[1]."/$1\">&gt;&gt;$1</a>", $message);
 					$mailto = $mail ? "<a href=\"mailto:$mail\"><span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span></a>" : "<span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span>";
 					$threadvn = "$threadvn\n"."<dt>$countt ：$mailto ： $time</dt><dd> $message <br><br></dd>\n";
 					if ($countt == $max){
@@ -114,7 +114,7 @@
 							return "<a href=\"//jump.14chan.cf/".$matches[1]."://".$matches[2]."\" target=\"_blank\">".$matches[1]."://".$matches[2]."</a>";
 						}
 					}, $message);
-					$message = preg_replace("/&gt;&gt;(\d+)/", "<a href=\"/test/read.cgi/$bbs/$key/$1\">&gt;&gt;$1</a>", $message);
+					$message = preg_replace("/&gt;&gt;(\d+)/", "<a href=\"/test/read.cgi/$bbs/".$kagi[1]."/$1\">&gt;&gt;$1</a>", $message);
 					$mailto = $mail ? "<a href=\"mailto:$mail\"><span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span></a>" : "<span style=\"color: ".$settings["BBS_NAME_COLOR"].";\"><b>$name</b></span>";
 					if ($countt == 1 || $countt >= $max-9){
 						$threadvn = "$threadvn\n"."<dt>$countt ：$mailto ： $time</dt><dd style=\"overflow-wrap: break-word\"> $message <br><br></dd>\n";
