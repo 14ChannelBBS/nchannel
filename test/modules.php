@@ -335,7 +335,7 @@
 	</body>';
 		file_put_contents("../$bbs/index.html",$index,LOCK_EX);
 	
-		$subback = '<html><head><title>'.$title[1].' - 14Channel BBS</title></head><body><small>'.$subjetttt.'</small><p style="margin: 0 0 0.5em 0; text-align: right; font-size: 0.8em; color: #933;">last modified at '.date("Y/m/d H:i:s").' JST</p></body></html>';
+		$subback = '<html><head><title>'.$settings["BBS_TITLE"].' - 14Channel BBS</title></head><body><small>'.$subjetttt.'</small><p style="margin: 0 0 0.5em 0; text-align: right; font-size: 0.8em; color: #933;">last modified at '.date("Y/m/d H:i:s").' JST</p></body></html>';
 		file_put_contents("../$bbs/subback.html",$subback,LOCK_EX);
 	}
 

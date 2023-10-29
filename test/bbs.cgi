@@ -551,11 +551,14 @@
 	}
 	//$subjecttxt = str_replace("$key.dat<>$subject2 (".$max.")\n", "", $subjecttxt);
 	//$subjecttxt = str_replace("$key.dat<>$gomi (".$max.")\n", "", $subjecttxt);
-	$subjecttxt = preg_replace("/$key\.dat<>.*\n/", "", $subjecttxt);
 	if (false === strpos("sage", $mail)) {
-		$subjecttxt = "$key.dat<>$subject2 (".($max+1).")\n$subjecttxt";
-	}else if (false !== strpos("ksage",$mail)) {
+		$subjecttxt = preg_replace("/$key\.dat<>.*\n/", "", $subjecttxt);
+	}
+	
+	if (false !== strpos("soko",$mail)) {
 		$subjecttxt = "$subjecttxt$key.dat<>$subject2 (".($max+1).")\n";
+	}else if (false !== strpos("sage", $mail)) {
+		$subjecttxt = $subjecttxt;
 	}
 	file_put_contents("../$bbs/subject.txt",$subjecttxt,LOCK_EX);
 	generateHTML($bbs);
