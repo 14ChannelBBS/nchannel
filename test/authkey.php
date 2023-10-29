@@ -1,13 +1,4 @@
 <?php
-	/*初期パラメータ
-	$secret = "14chan-RobotCheckAndRules-Bypass-key";
-
-	//sha1を使ってハッシュ化
-	$id_hash = hash_hmac("sha1", $ipaddr, $secret);
-
-	//base64の形式に変換
-	$id_base64 = base64_encode($id_hash);
-	*/
 	require "SysSettings.php";
 	if (strpos("{\"result\":{\"ipv4_cidrs\":[\"173.245.48.0/20\",\"103.21.244.0/22\",\"103.22.200.0/22\",\"103.31.4.0/22\",\"141.101.64.0/18\",\"108.162.192.0/18\",\"190.93.240.0/20\",\"188.114.96.0/20\",\"197.234.240.0/22\",\"198.41.128.0/17\",\"162.158.0.0/15\",\"104.16.0.0/13\",\"104.24.0.0/14\",\"172.64.0.0/13\",\"131.0.72.0/22\"],\"ipv6_cidrs\":[\"2400:cb00::/32\",\"2606:4700::/32\",\"2803:f800::/32\",\"2405:b500::/32\",\"2405:8100::/32\",\"2a06:98c0::/29\",\"2c0f:f248::/32\"],\"etag\":\"38f79d050aa027e3be3865e495dcc9bc\"},\"success\":true,\"errors\":[],\"messages\":[]}",$_SERVER["REMOTE_ADDR"]) !== false){
 		$ipaddr = $_SERVER["REMOTE_ADDR"];
@@ -24,19 +15,11 @@
 		$auth = false;
 	}
 	if (isset($_POST["cf-turnstile-response"])){
-		//初期パラメータ
-		$secret = "14chan-RobotCheckAndRules-Bypass-key";
-
-		//sha1を使ってハッシュ化
-		$id_hash = hash_hmac("sha1", $ipaddr, $secret);
-
-		//base64の形式に変換
-		$id_base64 = base64_encode($id_hash);
-
-		$id =  $id_base64;
+		//シークレット(将来いつ使うかは不明)
+		$id = bin2hex(openssl_random_pseudo_bytes(8));
 
 		$POST_DATA = array(
-			'secret' => $secret,
+			'secret' => $turnstile_secret,
 			'response' => $_POST["cf-turnstile-response"],
 			'remoteip' => $ipaddr
 		);

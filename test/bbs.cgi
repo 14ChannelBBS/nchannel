@@ -49,19 +49,11 @@
 		$settings["BBS_RES_MAX"] = 1000;
 	}
 	if (isset($_POST["cf-turnstile-response"])){
-		//初期パラメータ
-		$secret = "14chan-RobotCheckAndRules-Bypass-key";
-
-		//sha1を使ってハッシュ化
-		$id_hash = hash_hmac("sha1", $ipaddr, $secret);
-
-		//base64の形式に変換
-		$id_base64 = base64_encode($id_hash);
-
-		$id = $id_base64;
+		//シークレット(将来いつ使うかは不明)
+		$id = bin2hex(openssl_random_pseudo_bytes(8));
 
 		$POST_DATA = array(
-			'secret' => $secret,
+			'secret' => $turnstile_secret,
 			'response' => $_POST["cf-turnstile-response"],
 			//'response' => $_POST["h-captcha-response"],
 			'remoteip' => $ipaddr
@@ -79,7 +71,6 @@
 		curl_setopt($curl,CURLOPT_COOKIEJAR,	  'cookie');
 		curl_setopt($curl,CURLOPT_COOKIEFILE,	 'tmp');
 		curl_setopt($curl,CURLOPT_FOLLOWLOCATION, TRUE); // Locationヘッダを追跡
-		curl_setopt($curl,CURLOPT_CONNECTTIMEOUT, 0); //永遠に待つ
 		//curl_setopt($curl,CURLOPT_REFERER,		"REFERER");
 		//curl_setopt($curl,CURLOPT_USERAGENT,	  "USER_AGENT"); 
 		curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);	//IPv4だけを受け付ける
@@ -149,6 +140,13 @@
 	$content = preg_replace("/&lt;i&gt;(.*?)&lt;\/i&gt;/","<i>$1</i>",$content);
 	$content = preg_replace("/```(.*?)```/", "<pre style=\"font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;\">$1</pre>",$content);
 	$content = preg_replace("/\|\|(.*?)\|\|/","<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='$1'\">ネタバレ注意(クリックして表示)</span>",$content);
+	$content = preg_replace_callback(
+		"/&lt;vibrate&gt;(.*?)&lt;\/vibrate&gt;/",
+		function ($matches) {
+			return "<span class=\"buruburu\">".$matches[1]."</span> "."<style> .buruburu {    display: inline-block;    animation: hurueru .1s  infinite;}@keyframes hurueru {    0% {transform: translate(0px, 0px) rotateZ(0deg)}    25% {transform: translate(2px, 2px) rotateZ(1deg)}    50% {transform: translate(0px, 2px) rotateZ(0deg)}    75% {transform: translate(2px, 0px) rotateZ(-1deg)}    100% {transform: translate(0px, 0px) rotateZ(0deg)}}</style>";
+		},
+		$content
+	);
 	$content = preg_replace("/&lt;fluorescence&gt;(.*?)&lt;\/fluorescence&gt;/","<span style=\"  position: relative;  background: linear-gradient(transparent 40%, yellow 40%);\">$1</span>",$content);
 	$content = preg_replace_callback(
 		"/&lt;fluorescence color=(.+)&gt;(.*?)&lt;\/fluorescence&gt;/",
@@ -746,23 +744,15 @@ function PrintRobotCheckAndRules($settings,$flag = false) {
 	global $host;
 	global $sitekey;
 
-	//初期パラメータ
-	$secret = "14chan-RobotCheckAndRules-Bypass-key";
-
-	//sha1を使ってハッシュ化
-	$id_hash = hash_hmac("sha1", $ipaddr, $secret);
-
-	//base64の形式に変換
-	$id_base64 = base64_encode($id_hash);
-
-	$id =  $id_base64;
+	//シークレット(将来いつ使うかは不明)
+	$id = bin2hex(openssl_random_pseudo_bytes(8));
 
 	if ($flag == true){
 		$string = "<br><font size=\"4\" color=\"#FF0000\"><b>認証に失敗しました。もう一度認証をお願いします。</b></font>";
 	}
 
 	echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-	<html>
+	<html>openssl_random_pseudo_bytes(8)
 	<!-- 2ch_X:cookie -->
 	<head>
 	
