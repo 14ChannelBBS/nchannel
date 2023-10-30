@@ -1,0 +1,53 @@
+<?php
+	header("Content-Type: application/json charset=UTF-8");
+	$categories = array();
+	$host = $_SERVER['SERVER_NAME'];
+?>
+<?php
+	$dir = '';
+	$list1 = glob($dir . '*', GLOB_ONLYDIR);
+	$date = new DateTime();
+	$json = array(
+		"last_modify_string" => $date->format("Y/m/d")."(".substr($date->format("l"),0,3).") ".$date->format("H:i:s"),
+		"last_modify" => time(),
+		"description" => "14ch bbsmenu for the json application"
+	);
+	$json["menu_list"] = array();
+	
+	foreach ($list1 as $dir1) {
+		if (file_exists($dir1.'/SETTING.TXT')) {
+			$settings = parse_ini_file($dir1.'/SETTING.TXT',false,INI_SCANNER_RAW);
+			$categories[$settings["BBS_CATEGORY"]][$dir1] = $settings["BBS_TITLE"]."<>$dir1";
+		}
+	}
+
+	$count = 0;
+	$json["menu_list"] = array();
+	foreach ($categories as $index => $value) {
+		//echo "<BR><BR><B>".$index."</B><BR>";
+		$max = count($categories["$index"]);
+		$_tmp1 = array();
+		$_tmp1["category_name"] = mb_convert_encoding($index,"UTF-8","Shift-JIS");
+		$_tmp1["category_number"] = $count+1;
+		$_tmp1["category_content"] = array();
+		$count2 = 0;
+		foreach ($value as $board) {
+			//echo $board."<BR>\n";
+			$_tmp2 = array();
+			list($title,$path) = explode("<>",$board);
+			$title = mb_convert_encoding($title,"UTF-8","Shift-JIS");
+			$_tmp2["board_name"] = $title;
+			$_tmp2["category"] = $count+1;
+			$_tmp2["category_name"] = mb_convert_encoding($index,"UTF-8","Shift-JIS");
+			$_tmp2["category_order"] = $count2+1;
+			$_tmp2["directory_name"] = $path;
+			$_tmp2["url"] = "https://$host/".$path."/";
+			array_push($_tmp1["category_content"],$_tmp2);
+			$count2++;
+		}
+		array_push($json["menu_list"],$_tmp1);
+		$count++;
+	}
+	$raw = json_encode($json);
+	echo $raw;
+?>

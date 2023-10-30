@@ -5,9 +5,18 @@ AddType image/x-icon .ico
 AddDefaultCharset Shift-JIS
 
 <Files ~ "^robotcheck_bypass.txt$">
-  deny from all
+	deny from all
 </Files>
 
 <Files ~ "^clientids.txt$">
-  deny from all
+	deny from all
+</Files>
+
+<Files ~ "^bbsmenu.html$">
+	AddType application/x-httpd-php .html
+</Files>
+  
+<Files ~ "^bbsmenu.json$">
+	AddType application/x-httpd-php .json
+	AddDefaultCharset UTF-8
 </Files>
