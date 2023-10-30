@@ -1,0 +1,53 @@
+<?php
+	$categories = array();
+	$host = $_SERVER['SERVER_NAME'];
+?>
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<TITLE>14ちゃんねる掲示板リスト</TITLE>
+<BASE TARGET="cont">
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" link="#0000FF" alink="#ff0000" vlink="#660099" background="https://img.5ch.net/img/ba.gif">
+<div style="width:100%; text-align:center;">
+	<div style="margin: 0 auto; text-align:center;margin-bottom:5px; ">
+	</div>
+</div>
+<table border="1" cellspacing="11" cellpadding="2" width="95%" bgcolor="#CCFFCC" align="center">
+<tbody><tr><td>
+<table border="0" width="100%"><tbody><tr><td>
+
+<small>
+<a href=http://<?=$host?>/iyan.html>14ちゃんねるへようこそ</a>
+<?php
+	$dir = '';
+	$list1 = glob($dir . '*', GLOB_ONLYDIR);
+
+	foreach ($list1 as $dir1) {
+		if (file_exists($dir1.'/SETTING.TXT')) {
+			$settings = parse_ini_file($dir1.'/SETTING.TXT',false,INI_SCANNER_RAW);
+			$categories[$settings["BBS_CATEGORY"]][$dir1] = "<A HREF=http://$host/$dir1/>".$settings["BBS_TITLE"]."</A>";
+		}
+	}
+
+	foreach ($categories as $index => $value) {
+		echo "【<B>".$index."</B>】";
+		$max = count($categories["$index"]);
+		$count = 0;
+		foreach ($value as $board) {
+			if ($count == 0){
+				echo $board."\n";
+			}else{
+				echo "/".$board."\n";
+			}
+			$count++;
+		}
+	}
+?>
+【<B>運営案内</B>】
+◆苦情は<A HREF="/accuse/">批判要望</A>へ
+/<A HREF="mailto:nennneko5787@gmail.com">メール</A>
+</td></tr></tbody></table>
+</td></tr></tbody></table>
+</BODY>
+</HTML>

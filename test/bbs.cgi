@@ -144,12 +144,12 @@
 	}
 	$from = preg_replace('/##(.*)$/',"",$from);
 	$content = preg_replace("/\r\n|\n|\r/", " <br> ",$content);
-	$content = preg_replace("/\*\*(.*?)\*\*/", "<b>$1</b>",$content);
-	$content = preg_replace("/~~(.*?)~~/", "<s>$1</s>",$content);
-	$content = preg_replace("/__(.*?)__/", "<u>$1</u>",$content);
+	$content = preg_replace("/&lt;b&gt;(.*?)&lt;\/b&gt;/", "<b>$1</b>",$content);
+	$content = preg_replace("/&lt;s&gt;(.*?)&lt;\/s&gt;/", "<s>$1</s>",$content);
+	$content = preg_replace("/&lt;iu&gt;(.*?)&lt;\/u&gt;/", "<u>$1</u>",$content);
 	$content = preg_replace("/&lt;i&gt;(.*?)&lt;\/i&gt;/","<i>$1</i>",$content);
-	$content = preg_replace("/```(.*?)```/", "<pre style=\"font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;\">$1</pre>",$content);
-	$content = preg_replace("/\|\|(.*?)\|\|/","<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='$1'\">ネタバレ注意(クリックして表示)</span>",$content);
+	$content = preg_replace("/&lt;aa&gt;(.*?)&lt;\/aa&gt;/", "<pre style=\"font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;\">$1</pre>",$content);
+	$content = preg_replace("/&lt;spoiler&gt;(.*?)&lt;\/spoiler&gt;/","<span style=\"background-color: #CECECE;\" onClick=\"this.innerText='$1'\">ネタバレ注意(クリックして表示)</span>",$content);
 	$content = preg_replace_callback(
 		"/&lt;vibrate&gt;(.*?)&lt;\/vibrate&gt;/",
 		function ($matches) {

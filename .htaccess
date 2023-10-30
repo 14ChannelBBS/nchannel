@@ -15,6 +15,10 @@ AddDefaultCharset Shift-JIS
 <Files ~ "^bbsmenu.html$">
 	AddType application/x-httpd-php .html
 </Files>
+
+<Files ~ "^bbstable.html$">
+	AddType application/x-httpd-php .html
+</Files>
   
 <Files ~ "^bbsmenu.json$">
 	AddType application/x-httpd-php .json
