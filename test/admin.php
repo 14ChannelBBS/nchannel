@@ -7,7 +7,6 @@
 	$host = gethostbyaddr($ipaddr);
 
 	$from = '名無しさん@14ちゃんねる';
-	$id = generateid();
 	$iscap = false;
 
 	if (isset($_POST["bbs"])){
@@ -29,7 +28,7 @@
 ?>
 <meta name="robots" content="noindex">
 <h1>キャップ持ち用管理ページ（笑）</h1>
-<?=$from?>(<?=$id?>)さん、こんにちは<br>
+<?=$from?>さん、こんにちは<br>
 <form action="/test/admin.php" method="post">
 現在選択されている板：<?=substr($_POST["bbs"], 3)?><input type="hidden" name="bbs" value="<?=$_POST["bbs"]?>"><br>
 スレッドを選択してみる：<select name="thread">
@@ -52,7 +51,7 @@
 <option value="0">index.htmlの再生成</option>
 <option value="1">スレッドの削除</option>
 <option value="2">レスの削除</option>
-<option value="3">レスの削除</option>
+<option value="3">subject.txtの再生成</option>
 </select><br>
 <input type="hidden" name="pass" value="<?=$_POST["pass"]?>">
 <input type="submit" value="操作開始">
@@ -60,7 +59,7 @@
 <?php
 			}else{
 				if ($_POST["operation"] == "0"){
-					if ($_POST["bbs"] != "all"){
+					if ($_POST["bbs"] != ""){
 						generateHTML(substr($_POST["bbs"], 3));
 					}else{
 						$dir = '../';
@@ -108,6 +107,75 @@
 						echo "Operation Successful";
 						exit();
 					}
+				}else if ($_POST["operation"] == "3"){
+					if ($_POST["bbs"] != ""){
+						$threads = array();
+						$time_list = array(); //各ファイルの更新日付を格納する配列
+						$subjecttxt = array();
+
+						$dir = $_POST["bbs"].'/dat/';
+						$list1 = glob($dir . '*.dat');
+					
+						foreach ($list1 as $dir1) {
+							preg_match("/\/dat\/(.*)\.dat/",$dir1,$match);
+							$threads[] = $match[1].".dat";
+							$time_list[] = filemtime($dir1); //ファイルの更新日付を配列に格納する
+						}
+						// array_multisort('ソートを行う配列','ソート順','合わせてソートさせたい配列');
+						array_multisort($time_list,SORT_DESC,$threads); //更新日付でソート
+
+						foreach ($threads as $file){
+							$dat = file($_POST["bbs"].'/dat/'.$file);
+							list(,,,,$subject) = explode("<>",$dat[0]);
+							$subject = rtrim($subject);
+							if (!isset($subject)||$subject == ""){
+								$subject = '[ここ壊れてます]';
+							}
+							$subjecttxt[] = "$file<>$subject (".count($dat).")";
+						}
+						$sub = implode("\n",$subjecttxt);
+						file_put_contents($_POST["bbs"]."/subject.txt",$sub);
+
+						generateHTML(substr($_POST["bbs"], 3));
+					}else{
+						$dir = '../';
+						$list1 = glob($dir . '*', GLOB_ONLYDIR);
+					
+						foreach ($list1 as $dir1) {
+							if (file_exists($dir1.'/SETTING.TXT')) {
+								$threads = array();
+								$time_list = array(); //各ファイルの更新日付を格納する配列
+								$subjecttxt = array();
+		
+								$dir = $dir1.'/dat/';
+								$list1 = glob($dir . '*.dat');
+							
+								foreach ($list1 as $dir2) {
+									preg_match("/\/dat\/(.*)\.dat/",$dir2,$match);
+									$threads[] = $match[1].".dat";
+									$time_list[] = filemtime($dir2); //ファイルの更新日付を配列に格納する
+								}
+								// array_multisort('ソートを行う配列','ソート順','合わせてソートさせたい配列');
+								array_multisort($time_list,SORT_DESC,$threads); //更新日付でソート
+		
+								foreach ($threads as $file){
+									$dat = file($dir1.'/dat/'.$file);
+									list(,,,,$subject) = explode("<>",$dat[0]);
+									$subject = rtrim($subject);
+									if (!isset($subject)||$subject == ""){
+										$subject = '[ここ壊れてます]';
+									}
+									$subjecttxt[] = "$file<>$subject (".count($dat).")";
+								}
+								$sub = implode("\n",$subjecttxt);
+								file_put_contents($dir1."/subject.txt",$sub);
+		
+								generateHTML(substr($dir1, 3));
+							}
+						}
+					}
+					echo "Operation Successful";
+					exit();
 				}else{
 					echo "不正っすね～ｗｗｗ";
 					exit();
@@ -121,11 +189,10 @@
 ?>
 <meta name="robots" content="noindex">
 <h1>キャップ持ち用管理ページ（笑）</h1>
-<?=$from?>(<?=$id?>)、こんにちは<br>
+<?=$from?>、こんにちは<br>
 <form action="/test/admin.php" method="post">
-板を選択してみる：<select name="bbs" required>
-<option value="">--選択してください--</option>
-<option value="all">すべての板</option>
+板を選択してみる：<select name="bbs">
+<option value="">すべての板</option>
 <?php
 	$dir = '../';
 	$list1 = glob($dir . '*', GLOB_ONLYDIR);
@@ -142,23 +209,5 @@
 <input type="submit" value="ログイン">
 </form>
 <?php
-	}
-
-	function generateid(){
-		//初期パラメータ
-		global $ipaddr;
-		$date = new DateTime();
-		$timestamp = $date->format('Y-m-d');
-		$secret = "$bbs".$date->format('d-m-Y');
-
-		//sha1を使ってハッシュ化
-		$id_hash = hash_hmac("sha1", $timestamp.$ipaddr, $secret);
-
-		//base64の形式に変換
-		$id_base64 = base64_encode($id_hash);
-
-		//先頭の8文字だけ抜き取る
-		$id =  substr($id_base64, 0, 8);
-		return $id;
 	}
 ?>

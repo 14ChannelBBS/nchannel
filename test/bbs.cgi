@@ -12,7 +12,7 @@
 	$from = $_POST["FROM"];
 	$mail = $_POST["mail"];
 	$content = $_POST["MESSAGE"];
-	$subject = ltrim($_POST["subject"]);
+	$subject = rtrim($_POST["subject"]);
 	$issurenusi = false;
 	$isthreadstopped = false;
 	$client_id = $_COOKIE["clientid"]; //Client ID
@@ -559,6 +559,8 @@
 		$subjecttxt = "$subjecttxt$key.dat<>$subject2 (".($max+1).")\n";
 	}else if (false !== strpos("sage", $mail)) {
 		$subjecttxt = $subjecttxt;
+	}else{
+		$subjecttxt = "$key.dat<>$subject2 (".($max+1).")\n$subjecttxt";
 	}
 	file_put_contents("../$bbs/subject.txt",$subjecttxt,LOCK_EX);
 	generateHTML($bbs);
@@ -871,9 +873,10 @@ function trip( $name ) {
 function generateid(){
 	//初期パラメータ
 	global $ipaddr;
+	global $bbs;
 	$date = new DateTime();
 	$timestamp = $date->format('Y-m-d');
-	$secret = "$bbs".$date->format('d-m-Y');
+	$secret = "$bbs-$encrypt_key";
 
 	//sha1を使ってハッシュ化
 	$id_hash = hash_hmac("sha1", $timestamp.$ipaddr, $secret);
