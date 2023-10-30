@@ -135,7 +135,10 @@
 							$subjecttxt[] = "$file<>$subject (".count($dat).")";
 						}
 						$sub = implode("\n",$subjecttxt);
-						file_put_contents($_POST["bbs"]."/subject.txt",$sub."\n");
+						if ($sub != ""){
+							$sub = $sub."\n";
+						}
+						file_put_contents($_POST["bbs"]."/subject.txt",$sub);
 
 						generateHTML(substr($_POST["bbs"], 3));
 					}else{
@@ -169,7 +172,10 @@
 									$subjecttxt[] = "$file<>$subject (".count($dat).")";
 								}
 								$sub = implode("\n",$subjecttxt);
-								file_put_contents($dir1."/subject.txt",$sub."\n");
+								if ($sub != ""){
+									$sub = $sub."\n";
+								}
+								file_put_contents($dir1."/subject.txt",$sub);
 		
 								generateHTML(substr($dir1, 3));
 							}
