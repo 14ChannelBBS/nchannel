@@ -84,7 +84,8 @@
 						if (unlink($_POST["thread"])){
 							$subjecttxt = file_get_contents($_POST["bbs"]."/subject.txt");
 							$subject = trim($subject2);
-							$subjecttxt = preg_replace("/".substr($dir1, 11)."<>.*\n/", "", $subjecttxt);
+							$dir1 = preg_match("/\/dat\/(.*)\.dat/",$_POST["thread"],$match);
+							$subjecttxt = preg_replace("/".$dir1."<>.*\n/", "", $subjecttxt);
 							file_put_contents("../$bbs/subject.txt",$subjecttxt,LOCK_EX);
 							generateHTML(substr($_POST["bbs"], 3));
 							echo "Operation Successful";
@@ -134,7 +135,7 @@
 							$subjecttxt[] = "$file<>$subject (".count($dat).")";
 						}
 						$sub = implode("\n",$subjecttxt);
-						file_put_contents($_POST["bbs"]."/subject.txt",$sub);
+						file_put_contents($_POST["bbs"]."/subject.txt",$sub."\n");
 
 						generateHTML(substr($_POST["bbs"], 3));
 					}else{
@@ -168,7 +169,7 @@
 									$subjecttxt[] = "$file<>$subject (".count($dat).")";
 								}
 								$sub = implode("\n",$subjecttxt);
-								file_put_contents($dir1."/subject.txt",$sub);
+								file_put_contents($dir1."/subject.txt",$sub."\n");
 		
 								generateHTML(substr($dir1, 3));
 							}

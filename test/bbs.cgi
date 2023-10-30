@@ -15,7 +15,8 @@
 	$subject = rtrim($_POST["subject"]);
 	$issurenusi = false;
 	$isthreadstopped = false;
-	$client_id = $_COOKIE["clientid"]; //Client ID
+	$client_id = $_COOKIE["client_id"]; //Client ID
+	$isnewthread = false;
 	if (strpos("{\"result\":{\"ipv4_cidrs\":[\"173.245.48.0/20\",\"103.21.244.0/22\",\"103.22.200.0/22\",\"103.31.4.0/22\",\"141.101.64.0/18\",\"108.162.192.0/18\",\"190.93.240.0/20\",\"188.114.96.0/20\",\"197.234.240.0/22\",\"198.41.128.0/17\",\"162.158.0.0/15\",\"104.16.0.0/13\",\"104.24.0.0/14\",\"172.64.0.0/13\",\"131.0.72.0/22\"],\"ipv6_cidrs\":[\"2400:cb00::/32\",\"2606:4700::/32\",\"2803:f800::/32\",\"2405:b500::/32\",\"2405:8100::/32\",\"2a06:98c0::/29\",\"2c0f:f248::/32\"],\"etag\":\"38f79d050aa027e3be3865e495dcc9bc\"},\"success\":true,\"errors\":[],\"messages\":[]}",$_SERVER["REMOTE_ADDR"]) !== false){
 		$ipaddr = $_SERVER["REMOTE_ADDR"];
 	}else{
@@ -39,6 +40,10 @@
 	}
 	if (preg_match("/\D/", $key)){
 		PrintBBSError("キー情報が不正です！","UNIX時間って知っていますか...?");
+		exit();
+	}
+	if (isset($_POST["key"]) && $key != null && !file_exists('../'.$bbs.'/dat/'.$key.".dat")){
+		PrintBBSError("そんなスレッド存在しません！","あれれ");
 		exit();
 	}
 	if (!file_exists('../'.$bbs.'/SETTING.TXT')){
@@ -218,6 +223,7 @@
 	$from = str_replace("★", "☆", $from);
 	$from = str_replace("◆", "◇", $from);
 	if (file_exists("../$bbs/dat/$key.dat")){
+		$isnewthread = false;
 		if ($dat[(count($dat)-1)] == "停止しました。。。<>停止<>停止<>真・スレッドストッパー。。。(￣ー￣)ﾆﾔﾘ<>\n"){
 			PrintBBSError("このスレッドはストップされてるぽいです。。。","スレッドストッパーでも発動したんじゃないですかね？");
 			exit();
@@ -256,6 +262,7 @@
 			$ndat = implode("",$dat);
 		}
 	}else{
+		$isnewthread = true;
 		$key = time();
 		$issurenusi = true;
 		$cont = $content;
@@ -758,8 +765,8 @@ function PrintRobotCheckAndRules($settings,$flag = false) {
 		$string = "<br><font size=\"4\" color=\"#FF0000\"><b>認証に失敗しました。もう一度認証をお願いします。</b></font>";
 	}
 
-	echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-	<html>openssl_random_pseudo_bytes(8)
+	$kakunin = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+	<html>
 	<!-- 2ch_X:cookie -->
 	<head>
 	
@@ -772,56 +779,60 @@ function PrintRobotCheckAndRules($settings,$flag = false) {
 	<body vlink="#AA0088" text="#000000" link="#0000FF" bgcolor="#EFEFEF" alink="#FF0000">
 	<font size="4" color="#FF0000"><b>書きこみ＆ロボットチェック</b></font>
 	'.$string.'
-<blockquote style="margin-top:4em;">
- 名前： '.$from.'<br>
- E-mail： '.$mail.'<br>
- 内容：<br>
- '.$content.'<br>
-</blockquote>
+	<blockquote style="margin-top:4em;">
+	名前： '.$from.'<br>
+	E-mail： '.$mail.'<br>
+	内容：<br>
+	'.$content.'<br>
+	</blockquote>
 
-<div style="font-weight:bold;">
-投稿確認<br>
-・投稿者は、投稿に関して発生する責任が全て投稿者に帰すことを承諾します。<br>
-・投稿者は、話題と無関係な広告の投稿に関して、相応の費用を支払うことを承諾します<br>
-・投稿者は、投稿された内容について、掲示板運営者がコピー、保存、引用、転載等の利用することを許諾します。<br>
-　また、掲示板運営者に対して、著作者人格権を一切行使しないことを承諾します。<br>
-・投稿者は、掲示板運営者が指定する第三者に対して、著作物の利用許諾を一切しないことを承諾します。<br>
-</div>
+	<div style="font-weight:bold;">
+	投稿確認<br>
+	・投稿者は、投稿に関して発生する責任が全て投稿者に帰すことを承諾します。<br>
+	・投稿者は、話題と無関係な広告の投稿に関して、相応の費用を支払うことを承諾します<br>
+	・投稿者は、投稿された内容について、掲示板運営者がコピー、保存、引用、転載等の利用することを許諾します。<br>
+	　また、掲示板運営者に対して、著作者人格権を一切行使しないことを承諾します。<br>
+	・投稿者は、掲示板運営者が指定する第三者に対して、著作物の利用許諾を一切しないことを承諾します。<br>
+	</div>
 
-<p>
-現在、荒らし対策でロボットチェックを通過していないと書きこみできないようにしています。<br>
-<font size="2">(cookieを設定するとこの画面はでなくなります。)</font><br><br>
-<b>専ブラを使用している人やCookieが保存できない環境の人はWebブラウザから認証し、<a href="https://'.$_SERVER["SERVER_NAME"].'/test/authkey.php">https://'.$_SERVER["SERVER_NAME"].'/test/authkey.php</a>にアクセスし、認証キーを入手してください。</b><br>
-<pre>
-bbs:'.$bbs.'
-key:'.$key.'
-subject:'.$subject.'
-name:'.$from.'
-E-mail: '.$mail.'
-content:'.htmlspecialchars($content,ENT_QUOTES,"Shift_JIS").'
-ipaddr:'.$ipaddr.'
-host:'.$host.'
-ray-id:'.$_SERVER['HTTP_CF_RAY'].'
-</pre>
-</p>
+	<p>
+	現在、荒らし対策でロボットチェックを通過していないと書きこみできないようにしています。<br>
+	<font size="2">(cookieを設定するとこの画面はでなくなります。)</font><br><br>
+	<b>専ブラを使用している人やCookieが保存できない環境の人はWebブラウザから認証し、<a href="https://'.$_SERVER["SERVER_NAME"].'/test/authkey.php">https://'.$_SERVER["SERVER_NAME"].'/test/authkey.php</a>にアクセスし、認証キーを入手してください。</b><br>
+	<pre>
+	bbs:'.$bbs;
+	if (isset($key) && $key != null) $kakunin = $kakunin."\n".'	key:'.$key;
+	if (isset($subject) && $subject != null) $kakunin = $kakunin."\n".'	subject:'.$subject;
+	$kakunin = $kakunin."\n".'	name:'.$from.'
+	E-mail: '.$mail.'
+	content:'.htmlspecialchars($content,ENT_QUOTES,"Shift_JIS").'
+	ipaddr:'.$ipaddr.'
+	host:'.$host.'
+	ray-id:'.$_SERVER['HTTP_CF_RAY'].'
+	</pre>
+	</p>
 
-<form method="POST" action="/test/bbs.cgi">
-<div class="cf-turnstile" data-sitekey="'.$sitekey.'" data-callback="javascriptCallback"></div>
-<!--<div class="h-captcha" data-sitekey="3c898ad4-cd79-4bf7-aa03-246ceef4e1ad"></div>-->
-<input type="hidden" name="bbs" value="'.$bbs.'"><input type="hidden" name="key" value="'.$key.'"><input type="hidden" name="time" value="'.time().'">
-<input type="hidden" name="FROM" value="'.$from.'" size="19">
-<input type="hidden" name="mail" value="'.$mail.'" size="19">
-<input type="hidden" name="subject" value="'.$subject.'" size="19">
-<input type="hidden" name="MESSAGE" value="'.$content.'" size="19">
-<input type="submit" value="上記全てを承諾して書き込む"><br>
-</form>
+	<form method="POST" action="/test/bbs.cgi">
+	<div class="cf-turnstile" data-sitekey="'.$sitekey.'" data-callback="javascriptCallback"></div>
+	<!--<div class="h-captcha" data-sitekey="3c898ad4-cd79-4bf7-aa03-246ceef4e1ad"></div>-->
+	<input type="hidden" name="bbs" value="'.$bbs.'">';
+	if (isset($key) && $key != null) $kakunin = $kakunin."\n".'	<input type="hidden" name="key" value="'.$key.'">';
+	$kakunin = $kakunin."\n".'	<input type="hidden" name="time" value="'.time().'">
+	<input type="hidden" name="FROM" value="'.$from.'" size="19">
+	<input type="hidden" name="mail" value="'.$mail.'" size="19">';
+	if (isset($subject) && $subject != null) $kakunin = $kakunin."\n".'	<input type="hidden" name="subject" value="'.$subject.'" size="19">';
+	$kakunin = $kakunin."\n".'<input type="hidden" name="MESSAGE" value="'.$content.'" size="19">
+	<input type="submit" value="上記全てを承諾して書き込む"><br>
+	</form>
 
-<p>
-変更する場合は戻るボタンで戻って書き直して下さい。
-</p>
+	<p>
+	変更する場合は戻るボタンで戻って書き直して下さい。
+	</p>
 
-</body>
-</html>';
+	</body>
+	</html>';
+
+	echo $kakunin;
 }
 
 function check2chx(){
