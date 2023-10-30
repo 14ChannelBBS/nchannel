@@ -565,7 +565,11 @@
 	if (false !== strpos("soko",$mail)) {
 		$subjecttxt = "$subjecttxt$key.dat<>$subject2 (".($max+1).")\n";
 	}else if (false !== strpos("sage", $mail)) {
-		$subjecttxt = $subjecttxt;
+		if ($isnewthread != false){
+			$subjecttxt = $subjecttxt;
+		}else{
+			$subjecttxt = "$subjecttxt$key.dat<>$subject2 (".($max+1).")\n";
+		}
 	}else{
 		$subjecttxt = "$key.dat<>$subject2 (".($max+1).")\n$subjecttxt";
 	}
